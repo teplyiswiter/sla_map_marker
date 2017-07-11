@@ -20,7 +20,7 @@ function bgmp_wrapper( $ ) {
 		 */
 		init : function() {
 			// Initialize variables
-			$.bgmp.prefix            = 'bgmp_';
+			$.bgmp.prefix            = 'sgmm_';
 			$.bgmp.name              = 'Basic Google Maps Placemarks';
 			$.bgmp.canvas            = document.getElementById( $.bgmp.prefix + 'map-canvas' );		// We have to use getElementById instead of a jQuery selector here in order to pass it to the Maps API.
 			$.bgmp.map               = undefined;
@@ -38,6 +38,7 @@ function bgmp_wrapper( $ ) {
 				content  : '',
 				maxWidth : bgmpData.options.infoWindowMaxWidth
 			} );
+			
 
 			// Format numbers
 			bgmpData.options.zoom                = parseInt( bgmpData.options.zoom                );
@@ -90,7 +91,9 @@ function bgmp_wrapper( $ ) {
 
 			// Create the map
 			try {
+				console.log(mapOptions);
 				$.bgmp.map = new google.maps.Map( $.bgmp.canvas, mapOptions );
+				
 			} catch ( e ) {
 				$( $.bgmp.canvas ).html( $.bgmp.name + " error: couln't build map." );
 
