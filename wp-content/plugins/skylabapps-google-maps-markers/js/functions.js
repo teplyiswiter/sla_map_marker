@@ -74,7 +74,7 @@ function bgmp_wrapper( $ ) {
 
 			mapOptions = {
 				'zoom'                     : bgmpData.options.zoom,
-				'center'                   : new google.maps.LatLng( bgmpData.options.latitude, bgmpData.options.longitude ),
+				//'center'                   : new google.maps.LatLng( bgmpData.options.latitude, bgmpData.options.longitude ),
 				'mapTypeId'                : google.maps.MapTypeId[ bgmpData.options.type ],
 				'mapTypeControl'           : bgmpData.options.typeControl == 'off' ? false : true,
 				'mapTypeControlOptions'    : { style : google.maps.MapTypeControlStyle[ bgmpData.options.typeControl ] },
@@ -91,7 +91,6 @@ function bgmp_wrapper( $ ) {
 
 			// Create the map
 			try {
-				console.log(mapOptions);
 				$.bgmp.map = new google.maps.Map( $.bgmp.canvas, mapOptions );
 				
 			} catch ( e ) {
@@ -153,7 +152,7 @@ function bgmp_wrapper( $ ) {
 		 */
 		addPlacemarks : function( map ) {
 			// @todo - should probably refactor this since you pulled out the ajax. update phpdoc too
-
+			
 			if ( bgmpData.markers.length > 0 ) {
 				for ( var m in bgmpData.markers ) {
 					$.bgmp.createMarker(
@@ -166,7 +165,23 @@ function bgmp_wrapper( $ ) {
 						bgmpData.markers[ m ][ 'icon'      ],
 						parseInt( bgmpData.markers[ m ][ 'zIndex' ] )
 					);
+					
 				}
+				if (typeof(map) !== 'undefined') {
+          var bounds = new google.maps.LatLngBounds();
+					
+					var gmMarkers = $.map($.bgmp.markers, function(value, index) {
+						return [value];
+					});
+					console.log(gmMarkers);
+					
+          for (var i = 0; i < gmMarkers.length; i++) {
+						
+            bounds.extend(gmMarkers[i].getPosition());
+						console.log(gmMarkers[i].getPosition());
+          }
+          map.fitBounds(bounds);
+        }
 			}
 		},
 
@@ -234,6 +249,7 @@ function bgmp_wrapper( $ ) {
 				google.maps.event.addListener( marker, 'click', function() {
 					$.bgmp.openInfoWindow( map, marker, infoWindowContent );
 				} );
+				
 
 				return true;
 			} catch ( e ) {

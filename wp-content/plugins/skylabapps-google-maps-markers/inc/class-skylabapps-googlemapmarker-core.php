@@ -34,32 +34,152 @@ class Skylabapps_GoogleMapMarker_Core {
    */
   private function __construct() {
 
-    //add_action( 'init',                  array( $this, 'init'                    ), 8  );   // lower priority so that variables defined here will be available to BGMPSettings class and other init callbacks
-	  //add_action( 'init',                  array( $this, 'upgrade'                 )     );
     add_action( 'init',                  array( $this, 'createPostType'          )     );
     add_action( 'init',                  array( $this, 'createCategoryTaxonomy'  )     );
-		/*add_action( 'after_setup_theme',     array( $this, 'addFeaturedImageSupport' ), 11 );   // @todo add note explaining why higher priority
-		add_action( 'admin_init',            array( $this, 'addMetaBoxes'            )     );*/
 		add_action( 'wp',                    array( $this, 'loadResources'           ), 11 );   // @todo - should be wp_enqueue_scripts instead?	// @todo add note explaining why higher priority
-		add_action( 'admin_enqueue_scripts', array( $this, 'loadResources'           ), 11 );
-		/*add_action( 'wp_head',               array( $this, 'outputHead'              )     );
-		add_action( 'admin_notices',         array( $this, 'printMessages'           )     );
-		add_action( 'save_post',             array( $this, 'saveCustomFields'        )     );
 		add_action( 'wpmu_new_blog',         array( $this, 'activateNewSite'         )     );
-		add_action( 'shutdown',              array( $this, 'shutdown'                )     );
+		add_shortcode( 'sgmm-map',  				 array( $this, 'mapShortcode'  ) );		
+		add_filter('acf/fields/google_map/api', array( $this, 'acf_google_map_api' ));
 
-		add_filter( 'parse_query', array( $this, 'sortAdminView' ) );*/
-		add_shortcode( 'sgmm-map',  array( $this, 'mapShortcode'  ) );
-		/*add_shortcode( 'bgmp-list', array( $this, 'listShortcode' ) );*/
-
-		/*register_activation_hook(
-			dirname( __FILE__ ) . '/basic-google-maps-placemarks.php',
+		register_activation_hook(
+			SGMM_PATH . '/skylabapps-google-maps-markers.php',
 			array( $this, 'networkActivate' )
-		);*/
+		);
 
       require_once( SGMM_PATH . '/inc/class-skylabapps-googlemapmarker-settings.php' );
 		  $this->settings = new SGMM_Settings();
   }
+
+		public function acf_google_map_api( $api ){
+			if ( ! empty( $this->settings->mapApiKey ) ) {
+				$api['key'] = $this->settings->mapApiKey;
+			}
+			return $api;
+		}
+
+
+	/**
+		 * Runs activation code on a new WPMS site when it's created
+		 *
+		 * @author Ian Dunn <ian@iandunn.name>
+		 *
+		 * @param int $blogID
+		 */
+		public function activateNewSite( $blogID ) {
+			var_dump(did_action( 'wpmu_new_blog' ));
+			if ( did_action( 'wpmu_new_blog' ) !== 1 ) {
+				return;
+			}
+
+			switch_to_blog( $blogID );
+			$this->singleActivate();
+			restore_current_blog();
+		}
+		/**
+		 * Handles extra activation tasks for MultiSite installations
+		 *
+		 * @author Ian Dunn <ian@iandunn.name>
+		 *
+		 * @param bool $networkWide True if the activation was network-wide
+		 */
+		public function networkActivate( $networkWide ) {
+			global $wpdb, $wp_version;
+
+			if ( function_exists( 'is_multisite' ) && is_multisite() ) {
+				// Enable image uploads so the 'Set Featured Image' meta box will be available
+				$mediaButtons = get_site_option( 'mu_media_buttons' );
+
+				if ( version_compare( $wp_version, '3.3', "<=" ) && ( ! array_key_exists( 'image', $mediaButtons ) || ! $mediaButtons['image'] ) ) {
+					$mediaButtons['image'] = 1;
+					update_site_option( 'mu_media_buttons', $mediaButtons );
+
+					/*
+					@todo enqueueMessage() needs $this->options to be set, but as of v1.8 that doesn't happen until the init hook, which is after activation. It doesn't really matter anymore, though, because mu_media_buttons was removed in 3.3. http://core.trac.wordpress.org/ticket/17578
+					$this->enqueueMessage( sprintf(
+						__( '%s has enabled uploading images network-wide so that placemark icons can be set.', 'basic-google-maps-placemarks' ),		// @todo - give more specific message, test. enqueue for network admin but not regular admins
+						SGMM_NAME
+					) );
+					*/
+				}
+
+				// Activate the plugin across the network if requested
+				if ( $networkWide ) {
+					$blogs = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
+
+					foreach ( $blogs as $b ) {
+						switch_to_blog( $b );
+						$this->singleActivate();
+					}
+
+					restore_current_blog();
+				} else {
+					$this->singleActivate();
+				}
+			} else {
+				$this->singleActivate();
+			}
+		}
+		/**
+		 * Prepares a single blog to use the plugin
+		 *
+		 * @author Ian Dunn <ian@iandunn.name>
+		 */
+		protected function singleActivate() {
+			// Save default settings
+			if ( ! get_option( self::PREFIX . 'map-width' ) ) {
+				add_option( self::PREFIX . 'map-width', 600 );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-height' ) ) {
+				add_option( self::PREFIX . 'map-height', 400 );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-latitude' ) ) {
+				add_option( self::PREFIX . 'map-latitude', 47.6062095 );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-longitude' ) ) {
+				add_option( self::PREFIX . 'map-longitude', - 122.3320708 );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-zoom' ) ) {
+				add_option( self::PREFIX . 'map-zoom', 7 );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-type' ) ) {
+				add_option( self::PREFIX . 'map-type', 'ROADMAP' );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-type-control' ) ) {
+				add_option( self::PREFIX . 'map-type-control', 'off' );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-navigation-control' ) ) {
+				add_option( self::PREFIX . 'map-navigation-control', 'DEFAULT' );
+			}
+
+			if ( ! get_option( self::PREFIX . 'map-info-window-width' ) ) {
+				add_option( self::PREFIX . 'map-info-window-width', 500 );
+			}
+
+			if ( ! get_option( self::PREFIX . 'marker-clustering' ) ) {
+				add_option( self::PREFIX . 'marker-clustering', '' );
+			}
+
+			if ( ! get_option( self::PREFIX . 'cluster-max-zoom' ) ) {
+				add_option( self::PREFIX . 'cluster-max-zoom', '7' );
+			}
+
+			if ( ! get_option( self::PREFIX . 'cluster-grid-size' ) ) {
+				add_option( self::PREFIX . 'cluster-grid-size', '40' );
+			}
+
+			if ( ! get_option( self::PREFIX . 'cluster-style' ) ) {
+				add_option( self::PREFIX . 'cluster-style', 'default' );
+			}
+
+			// @todo - this isn't DRY, same values in BGMPSettings::__construct() and upgrade()
+		}
 	/**
 		 * Validates and cleans the map shortcode arguments
 		 *
@@ -151,7 +271,7 @@ class Skylabapps_GoogleMapMarker_Core {
 							unset( $arguments['categories'][ $index ] );    // Note - This will leave holes in the key sequence, but it doesn't look like that's a problem with the way we're using it.
 							$this->enqueueMessage( sprintf(
 								__( '%s shortcode error: %s is not a valid category.', 'basic-google-maps-placemarks' ),
-								BGMP_NAME,
+								SGMM_NAME,
 								$term
 							), 'error' );
 						}
@@ -166,7 +286,7 @@ class Skylabapps_GoogleMapMarker_Core {
 				} else {
 					$this->enqueueMessage( sprintf(
 						__( '%s shortcode error: %s is not a valid width.', 'basic-google-maps-placemarks' ),
-						BGMP_NAME,
+						SGMM_NAME,
 						$arguments['width']
 					), 'error' );
 				}
@@ -180,7 +300,7 @@ class Skylabapps_GoogleMapMarker_Core {
 				} else {
 					$this->enqueueMessage( sprintf(
 						__( '%s shortcode error: %s is not a valid height.', 'basic-google-maps-placemarks' ),
-						BGMP_NAME,
+						SGMM_NAME,
 						$arguments['height']
 					), 'error' );
 				}
@@ -207,7 +327,7 @@ class Skylabapps_GoogleMapMarker_Core {
 				if ( ! is_numeric( $arguments['zoom'] ) || $arguments['zoom'] < self::ZOOM_MIN || $arguments['zoom'] > self::ZOOM_MAX ) {
 					$this->enqueueMessage( sprintf(
 						__( '%s shortcode error: %s is not a valid zoom level.', 'basic-google-maps-placemarks' ),
-						BGMP_NAME,
+						SGMM_NAME,
 						$arguments['zoom']
 					), 'error' );
 
@@ -264,9 +384,9 @@ class Skylabapps_GoogleMapMarker_Core {
 			$attributes = $this->cleanMapShortcodeArguments( $attributes );
 
 			ob_start();
-			do_action( BasicGoogleMapsPlacemarks::PREFIX . 'meta-address-before' );
+			do_action( Skylabapps_GoogleMapMarker_Core::PREFIX . 'meta-address-before' );
 			require_once( SGMM_PATH . '/inc/views/shortcode-bgmp-map.php' );
-			do_action( BasicGoogleMapsPlacemarks::PREFIX . 'shortcode-bgmp-map-after' );
+			do_action( Skylabapps_GoogleMapMarker_Core::PREFIX . 'shortcode-bgmp-map-after' );
 			$output = ob_get_clean();
 
 			return $output;
@@ -501,13 +621,20 @@ class Skylabapps_GoogleMapMarker_Core {
 					}
 
 					$icon        = wp_get_attachment_image_src( get_post_thumbnail_id( $postID ), apply_filters( self::PREFIX . 'featured-icon-size', 'thumbnail' ) );
-					$defaultIcon = apply_filters( self::PREFIX . 'default-icon', plugins_url( 'images/default-marker.png', __FILE__ ), $postID );
+					$defaultIcon = apply_filters( self::PREFIX . 'default-icon', SGMM_SCRIPT_PATH. 'images/default-marker.png', $postID );
+					//$location    = get_post_meta( $postID, 'location', true );
+					$location = get_field('location', $postID);
+					//var_dump($location['lat']);
+					//var_dump($location);
+					
 
 					$placemark = array(
 						'id'         => $postID,
 						'title'      => apply_filters( 'the_title', $pp->post_title ),
-						'latitude'   => get_post_meta( $postID, self::PREFIX . 'latitude', true ),
-						'longitude'  => get_post_meta( $postID, self::PREFIX . 'longitude', true ),
+						/*'latitude'   => get_post_meta( $postID, self::PREFIX . 'latitude', true ),
+						'longitude'  => get_post_meta( $postID, self::PREFIX . 'longitude', true ),*/
+						'latitude'   => isset( $location['lat'] ) ? $location['lat']: '',
+						'longitude'  => isset( $location['lng'] ) ? $location['lng']: '',
 						'details'    => apply_filters( 'the_content', $pp->post_content ),	// note: don't use setup_postdata/get_the_content() in this instance -- http://lists.automattic.com/pipermail/wp-hackers/2013-January/045053.html
 						'categories' => $categories,
 						'icon'       => is_array( $icon ) ? $icon[0] : $defaultIcon,
@@ -517,7 +644,6 @@ class Skylabapps_GoogleMapMarker_Core {
 					$placemarks[] = apply_filters( self::PREFIX . 'get-map-placemarks-individual-placemark', $placemark );
 				}
 			}
-
 			$placemarks = apply_filters( self::PREFIX . 'get-placemarks-return', $placemarks );    // @todo - filter name deprecated
 			return apply_filters( self::PREFIX . 'get-map-placemarks-return', $placemarks );
 		}

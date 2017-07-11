@@ -13,7 +13,7 @@ load_plugin_textdomain( 'skylabapps-google-maps-markers', false, basename( dirna
 
 define( 'SGMM_PATH', dirname( __FILE__ ) );
 define( 'SGMM_SCRIPT_PATH', plugin_dir_url( __FILE__ ) );
-define( 'SGMM_NAME', __( 'Basic Google Maps Placemarks', 'basic-google-maps-placemarks' ) );
+define( 'SGMM_NAME', __( 'Skylabapss Google Maps Markers', 'skylabapps-google-maps-markers' ) );
 
 require_once( SGMM_PATH . '/inc/class-skylabapps-googlemapmarker-core.php' );
 
