@@ -31,7 +31,6 @@ wp-content/*
 !wp-content/mu-plugins/
 !wp-content/plugins/
 !wp-content/themes/
-!wp-content/uploads/
 
 wp-content/uploads/wp-migrate-db/index.php
 

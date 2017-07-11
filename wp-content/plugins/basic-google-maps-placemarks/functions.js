@@ -150,7 +150,6 @@ function bgmp_wrapper( $ ) {
 		 */
 		addPlacemarks : function( map ) {
 			// @todo - should probably refactor this since you pulled out the ajax. update phpdoc too
-
 			if ( bgmpData.markers.length > 0 ) {
 				for ( var m in bgmpData.markers ) {
 					$.bgmp.createMarker(

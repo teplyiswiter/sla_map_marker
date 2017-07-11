@@ -90,17 +90,17 @@ add_action( 'after_setup_theme', 'skylabapps_map_marker_setup' );
  *
  * @global int $content_width
  */
-function skylabapps_map_marker_content_width() {
+/*function skylabapps_map_marker_content_width() {
 	$GLOBALS['content_width'] = apply_filters( 'skylabapps_map_marker_content_width', 640 );
 }
-add_action( 'after_setup_theme', 'skylabapps_map_marker_content_width', 0 );
+add_action( 'after_setup_theme', 'skylabapps_map_marker_content_width', 0 );*/
 
 /**
  * Register widget area.
  *
  * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
  */
-function skylabapps_map_marker_widgets_init() {
+/*function skylabapps_map_marker_widgets_init() {
 	register_sidebar( array(
 		'name'          => esc_html__( 'Sidebar', 'skylabapps_map_marker' ),
 		'id'            => 'sidebar-1',
@@ -111,12 +111,12 @@ function skylabapps_map_marker_widgets_init() {
 		'after_title'   => '</h2>',
 	) );
 }
-add_action( 'widgets_init', 'skylabapps_map_marker_widgets_init' );
+add_action( 'widgets_init', 'skylabapps_map_marker_widgets_init' );*/
 
 /**
  * Enqueue scripts and styles.
  */
-function skylabapps_map_marker_scripts() {
+/*function skylabapps_map_marker_scripts() {
 	wp_enqueue_style( 'skylabapps_map_marker-style', get_stylesheet_uri() );
 
 	wp_enqueue_script( 'skylabapps_map_marker-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
@@ -127,29 +127,5 @@ function skylabapps_map_marker_scripts() {
 		wp_enqueue_script( 'comment-reply' );
 	}
 }
-add_action( 'wp_enqueue_scripts', 'skylabapps_map_marker_scripts' );
+add_action( 'wp_enqueue_scripts', 'skylabapps_map_marker_scripts' );*/
 
-/**
- * Implement the Custom Header feature.
- */
-//require get_template_directory() . '/inc/custom-header.php';
-
-/**
- * Custom template tags for this theme.
- */
-//require get_template_directory() . '/inc/template-tags.php';
-
-/**
- * Functions which enhance the theme by hooking into WordPress.
- */
-//require get_template_directory() . '/inc/template-functions.php';
-
-/**
- * Customizer additions.
- */
-//require get_template_directory() . '/inc/customizer.php';
-
-/**
- * Load Jetpack compatibility file.
- */
-//require get_template_directory() . '/inc/jetpack.php';

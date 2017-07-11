@@ -688,7 +688,7 @@ class Skylabapps_GoogleMapMarker_Core {
 	    $postTypeParams = array(
         'labels'          => $labels,
         'singular_label'  => $singular,
-        'public'          => true,
+        'public'          => false,
         'menu_position'   => 20,
         'hierarchical'    => false,
         'capability_type' => 'post',
