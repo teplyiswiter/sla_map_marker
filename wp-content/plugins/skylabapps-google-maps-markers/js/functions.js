@@ -173,12 +173,9 @@ function bgmp_wrapper( $ ) {
 					var gmMarkers = $.map($.bgmp.markers, function(value, index) {
 						return [value];
 					});
-					console.log(gmMarkers);
 					
-          for (var i = 0; i < gmMarkers.length; i++) {
-						
+          for (var i = 0; i < gmMarkers.length; i++) {						
             bounds.extend(gmMarkers[i].getPosition());
-						console.log(gmMarkers[i].getPosition());
           }
           map.fitBounds(bounds);
         }

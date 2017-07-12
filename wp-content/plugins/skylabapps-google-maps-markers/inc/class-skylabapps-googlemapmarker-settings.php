@@ -141,12 +141,12 @@ if ( ! class_exists( 'SGMMSettings' ) ) {
 				Skylabapps_GoogleMapMarker_Core::PREFIX . 'settings'
 			);
 
-			add_settings_section(
+			/*add_settings_section(
 				Skylabapps_GoogleMapMarker_Core::PREFIX . 'marker-cluster-settings',
 				'',
 				array( $this, 'markupSettingsSections' ),
 				Skylabapps_GoogleMapMarker_Core::PREFIX . 'settings'
-			);
+			);*/
 
 
 			// Map Settings
@@ -243,7 +243,7 @@ if ( ! class_exists( 'SGMMSettings' ) ) {
 
 
 			// Marker Clustering
-			add_settings_field(
+			/*add_settings_field(
 				Skylabapps_GoogleMapMarker_Core::PREFIX . 'marker-clustering',
 				__( 'Marker Clustering', 'skylabapps-google-maps-markers' ),
 				array( $this, 'markupMarkerClusterFields' ),
@@ -282,7 +282,7 @@ if ( ! class_exists( 'SGMMSettings' ) ) {
 			register_setting( Skylabapps_GoogleMapMarker_Core::PREFIX . 'settings', Skylabapps_GoogleMapMarker_Core::PREFIX . 'marker-clustering' );
 			register_setting( Skylabapps_GoogleMapMarker_Core::PREFIX . 'settings', Skylabapps_GoogleMapMarker_Core::PREFIX . 'cluster-max-zoom'  );
 			register_setting( Skylabapps_GoogleMapMarker_Core::PREFIX . 'settings', Skylabapps_GoogleMapMarker_Core::PREFIX . 'cluster-grid-size' );
-			register_setting( Skylabapps_GoogleMapMarker_Core::PREFIX . 'settings', Skylabapps_GoogleMapMarker_Core::PREFIX . 'cluster-style'     );
+			register_setting( Skylabapps_GoogleMapMarker_Core::PREFIX . 'settings', Skylabapps_GoogleMapMarker_Core::PREFIX . 'cluster-style'     );*/
 
 			// @todo - add input validation  -- http://ottopress.com/2009/wordpress-settings-api-tutorial/
 		}
@@ -300,7 +300,7 @@ if ( ! class_exists( 'SGMMSettings' ) ) {
 			switch ( $section['id'] ) {
 				case Skylabapps_GoogleMapMarker_Core::PREFIX . 'map-settings':
 					echo '<h3>' . __( 'Map Settings', 'skylabapps-google-maps-markers' ) . '</h3>';
-					echo '<p>'  . __( 'The map(s) will use these settings as defaults, but you can override them on individual maps using shortcode arguments. See <a href="http://wordpress.org/extend/plugins/skylabapps-google-maps-markers/installation/">the Installation page</a> for details.', 'skylabapps-google-maps-markers' ) . '</p>';
+					//echo '<p>'  . __( 'The map(s) will use these settings as defaults, but you can override them on individual maps using shortcode arguments. See <a href="http://wordpress.org/extend/plugins/skylabapps-google-maps-markers/installation/">the Installation page</a> for details.', 'skylabapps-google-maps-markers' ) . '</p>';
 					break;
 
 				case Skylabapps_GoogleMapMarker_Core::PREFIX . 'marker-cluster-settings':

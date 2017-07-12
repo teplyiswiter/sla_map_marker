@@ -587,6 +587,7 @@ class Skylabapps_GoogleMapMarker_Core {
 		 */
 		public function getMapPlacemarks( $attributes ) {
 			$placemarks = array();
+			
 
 			$query = array(
 				'numberposts' => - 1,
@@ -613,21 +614,25 @@ class Skylabapps_GoogleMapMarker_Core {
 
 			if ( $publishedPlacemarks ) {
 				foreach ( $publishedPlacemarks as $pp ) {
+					$icon = '';
 					$postID = $pp->ID;
 
 					$categories = get_the_terms( $postID, self::TAXONOMY );
 					if ( ! is_array( $categories ) ) {
 						$categories = array();
 					}
-
-					$icon        = wp_get_attachment_image_src( get_post_thumbnail_id( $postID ), apply_filters( self::PREFIX . 'featured-icon-size', 'thumbnail' ) );
+					else {
+						$category = $categories[0];
+						$iconArr = get_field( 'marker_icon', self::TAXONOMY.'_'.$category->term_id );
+						if( is_array( $iconArr ) && isset( $iconArr[ 'url' ] )) {
+							$icon = $iconArr[ 'url' ];
+						}
+					}
+					//$icon        = wp_get_attachment_image_src( get_post_thumbnail_id( $postID ), apply_filters( self::PREFIX . 'featured-icon-size', 'thumbnail' ) );
 					$defaultIcon = apply_filters( self::PREFIX . 'default-icon', SGMM_SCRIPT_PATH. 'images/default-marker.png', $postID );
 					//$location    = get_post_meta( $postID, 'location', true );
 					$location = get_field('location', $postID);
-					//var_dump($location['lat']);
-					//var_dump($location);
-					
-
+			
 					$placemark = array(
 						'id'         => $postID,
 						'title'      => apply_filters( 'the_title', $pp->post_title ),
@@ -637,7 +642,7 @@ class Skylabapps_GoogleMapMarker_Core {
 						'longitude'  => isset( $location['lng'] ) ? $location['lng']: '',
 						'details'    => apply_filters( 'the_content', $pp->post_content ),	// note: don't use setup_postdata/get_the_content() in this instance -- http://lists.automattic.com/pipermail/wp-hackers/2013-January/045053.html
 						'categories' => $categories,
-						'icon'       => is_array( $icon ) ? $icon[0] : $defaultIcon,
+						'icon'       => $icon != '' ? $icon : $defaultIcon,
 						'zIndex'     => get_post_meta( $postID, self::PREFIX . 'zIndex', true )
 					);
 
@@ -689,6 +694,7 @@ class Skylabapps_GoogleMapMarker_Core {
         'labels'          => $labels,
         'singular_label'  => $singular,
         'public'          => false,
+				'show_ui'					=> true,
         'menu_position'   => 20,
         'hierarchical'    => false,
         'capability_type' => 'post',
@@ -712,10 +718,10 @@ class Skylabapps_GoogleMapMarker_Core {
 	public function createCategoryTaxonomy() {
     if ( ! taxonomy_exists( self::TAXONOMY ) ) {
 		  $taxonomyParams = array(
-	      'label'                 => __( 'Category', 'basic-google-maps-placemarks' ),
+	      'label'                 => __( 'Marker category', 'basic-google-maps-placemarks' ),
 		    'labels'                => array(
-		    'name'              => __( 'Categories', 'basic-google-maps-placemarks' ),
-		    'singular_name'     => __( 'Category',   'basic-google-maps-placemarks' ),
+		    'name'              => __( 'Marker categories', 'basic-google-maps-placemarks' ),
+		    'singular_name'     => __( 'Marker category',   'basic-google-maps-placemarks' ),
         ),
 		    'hierarchical'          => true,
 		    'rewrite'               => array( 'slug' => self::TAXONOMY ),
